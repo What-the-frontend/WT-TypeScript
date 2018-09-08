@@ -31,3 +31,47 @@ printLabel(myObj);
 `LabelledValue` 인터페이스 이전 예제의 요구사항(parameter)을 설명하는데 사용할 수 있는 이름이다. 이는 여전히 문자열 타입의 `label` 프로퍼티를 나타내며, 명시적으로 `printLabel` 함수에서 인터페이스를 구현하겠다고 다른 언어(Java)와 달리 명시적으로 나타낼 필요가 없었다. TypeScript에서의 인터페이스는 단순히 형태에 불과하며, 객체가 나열한 요구사항을 충족하면 됩니다.
 
 type-checker가 순서에 맞게 정렬될 필요없이, 단지 인터페이스에서 요구한 해당 프로퍼티가 제공되고 요구한 타입이 있는지 충족하기만 된다는 점을 지적해야한다.
+
+Optional Properties
+---
+인터페이스의 모든 프로퍼티가 제공되어야만 하는건 아닐것이다. 일부 조건하에 존재하거나, 전혀 없을수도 있다. Optional Properties는 오직 한쌍의 프로퍼티를 전달받는 함수에 전달하는 객체에서 "option bags" 와 같은 패턴을 만들때 많이 사용된다.
+
+이 패턴에 대한 예제이다.
+```typescript
+interface SquareConfig {
+  color?: string,
+  width?: number
+}
+
+function createSquare(config: SquareConfig): { color: string; area: number } {
+  let newSquare = { color: "white", area: 100 };
+  if (config.color)
+    newSquare.color = config.color;
+  if (config.width)
+    newSquare.area = config.width * config.width;
+  return newSquare;
+}
+
+let mySquare = createSquare({ color: "black" });
+```
+optional properties를 가진 인터페이스도 선언내부의 각각의 optional property가 프로퍼티 이름의 마지막에 `?` 표시가 된채로 다른 인터페이스와 비슷하게 작성된다.
+
+optional properties의 장점은 여전히 사용가능한 프로퍼티를 나타낼 수 있지만, 인터페이스의 일부가 아닌 프로퍼티의 사용을 방지할 수 있다는 것이다. 예를 들어서, `createSquare` 안에 `color` 라는 이름의 프로퍼티의 타입을 정해주지 않으면, 에러를 발생시킨다.
+```typescript
+interface SquareConfig {
+  color?: string;
+  width?: number;
+}
+
+function createSquare(config: SquareConfig): { color: string; area: number } {
+  let newSquare = { color: "white", area: 100 };
+  if (config.clor)
+    // Error: Property 'color' does not exist on type 'SquareConfig'
+    newSquare.color = config.clor;
+  if (config.width)
+    newSquare.area = config.width * config.width;
+  return newSquare;
+}
+
+let mySquare = createSquare({ color: "black" });
+```
